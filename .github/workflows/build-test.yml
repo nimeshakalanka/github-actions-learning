@@ -55,6 +55,7 @@ jobs:
         run: echo "Build output" > output.txt
  
       - name: Upload artifact
+        if: matrix.node-version == '18.x'
         uses: actions/upload-artifact@v4
         with:
           name: build-output
