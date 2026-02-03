@@ -6,8 +6,10 @@ on:
     paths:
       - 'sample-app/**'
       - '.github/workflows/build-test.yml'
+
   pull_request:
     branches: [main]
+
   workflow_dispatch:
 
 jobs:
@@ -27,51 +29,49 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Print environment
+      - name: Print environment variables
         run: |
-          echo "Environment: ${{ env.NODE_ENV }}"
-          echo "Log Level: ${{ env.LOG_LEVEL }}"
+          echo "Environment: $NODE_ENV"
+          echo "Log Level: $LOG_LEVEL"
 
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: 'sample-app/package-lock.json'
 
       - name: Install dependencies
-        working-directory: ./sample-app
-        run: npm ci
+        working-directory: sample-app
+        run: npm install
 
       - name: Run linter
-        working-directory: ./sample-app
+        working-directory: sample-app
         run: npm run lint
         continue-on-error: true
 
       - name: Build application
-        working-directory: ./sample-app
+        working-directory: sample-app
         run: npm run build
 
       - name: Run tests
-        working-directory: ./sample-app
+        working-directory: sample-app
         run: npm test
 
       - name: Upload coverage reports
         if: matrix.node-version == '18.x'
         uses: actions/upload-artifact@v3
         with:
-          name: coverage-report-${{ matrix.node-version }}
-          path: sample-app/coverage/
+          name: coverage-report-node-${{ matrix.node-version }}
+          path: sample-app/coverage
           retention-days: 30
 
       - name: Check coverage
         if: always()
-        working-directory: ./sample-app
+        working-directory: sample-app
         run: |
-          if [ -f coverage/coverage-summary.json ]; then
-            echo "✅ Coverage report generated"
+          if [ -d coverage ]; then
+            echo "✅ Coverage directory exists"
           else
-            echo "⚠️ No coverage report found"
+            echo "⚠️ No coverage directory found"
           fi
 
   lint-check:
@@ -83,24 +83,25 @@ jobs:
       LOG_LEVEL: debug
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Print environment
+      - name: Print environment variables
         run: |
-          echo "Environment: ${{ env.NODE_ENV }}"
-          echo "Log Level: ${{ env.LOG_LEVEL }}"
+          echo "Environment: $NODE_ENV"
+          echo "Log Level: $LOG_LEVEL"
 
-      - uses: actions/setup-node@v3
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
         with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: 'sample-app/package-lock.json'
+          node-version: 18
 
-      - working-directory: ./sample-app
-        run: npm ci
+      - name: Install dependencies
+        working-directory: sample-app
+        run: npm install
 
       - name: Run ESLint
-        working-directory: ./sample-app
+        working-directory: sample-app
         run: npm run lint
         continue-on-error: true
 
@@ -111,8 +112,8 @@ jobs:
     if: always()
 
     steps:
-      - name: Print test results
+      - name: Print test summary
         run: |
           echo "🎯 Test Run Summary"
           echo "==================="
-          echo "✅ All tests completed"
+          echo "Build & tests finished"
