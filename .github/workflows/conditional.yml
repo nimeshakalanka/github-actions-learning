@@ -1,0 +1,25 @@
+name: Conditional Execution
+
+on:
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  conditional-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+ 
+      - name: Print current branch ref
+        run: echo "The current branch reference is ${{ github.ref }}"
+
+      - name: Run Tests (Runs on every branch)
+        run: echo "Tests are running..."
+
+       
+      - name: Deploy (main only)
+        if: github.ref == 'refs/heads/main'
+        run: echo "Deploying to production..."
