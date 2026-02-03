@@ -1,5 +1,4 @@
-name: Hello World Workflow #HELLO
-
+name: Hello World Workflow 
 on:
   push:
     branches: [main, develop]
@@ -13,6 +12,8 @@ jobs:
     steps:
       - name: Access secret
         run: echo "Secret length: ${#{{ secrets.TEST_SECRET }}}"
+
+
 
       - name: Print hello message
         run: echo "🎉 Hello from GitHub Actions!"
